@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#080b18">
+<title>NEON RUSH — Arcade</title>
+<style>
+:root{--cyan:#53ffe8;--pink:#ff4f83;--gold:#ffe58a;--muted:#929fbd;--panel:#111a31;--line:#273653}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -10%,#1b2b52 0,#0b1022 45%,#070a14 100%);color:#f5f7ff;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;display:flex;justify-content:center;padding:14px}
+.app{width:100%;max-width:460px}
+header{display:flex;align-items:center;justify-content:space-between;margin:3px 2px 14px}
+.brand{font-size:12px;letter-spacing:3px;font-weight:1000;color:var(--cyan)}
+.pill{border:1px solid #354462;background:#111a2d;border-radius:30px;padding:7px 11px;color:#c6d1eb;font-size:11px;font-weight:800}
+.hero{display:flex;align-items:flex-end;justify-content:space-between;margin:0 2px 15px}
+h1{font-size:clamp(42px,12vw,57px);letter-spacing:-3px;line-height:.83;margin:0;font-weight:1000}
+h1 span{color:var(--cyan);text-shadow:0 0 24px #53ffe855}
+.tagline{font-size:12px;color:#aab5d1;margin:12px 0 0}
+.mini-icon{width:54px;height:54px;border-radius:17px;background:linear-gradient(145deg,#19294b,#0b1326);border:1px solid #3a5278;display:grid;place-items:center;color:var(--cyan);font-size:30px;box-shadow:0 0 30px #53ffe817}
+.gamebox{border:1px solid #2b3b5b;border-radius:24px;overflow:hidden;background:#080f20;box-shadow:0 18px 55px #0006,0 0 40px #53ffe80a}
+.hud{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;padding:12px;background:linear-gradient(90deg,#101a31,#0c1428)}
+.hudcell{padding:5px 9px;border-right:1px solid #273653}.hudcell:last-child{border:0;text-align:right}.label{font-size:9px;letter-spacing:1.5px;color:#91a0c1;font-weight:900}.value{font-size:23px;line-height:1.2;font-weight:950;letter-spacing:-.5px}.cyan{color:var(--cyan)}.pink{color:var(--pink)}
+.stage{position:relative;background:#081023}
+canvas{display:block;width:100%;height:auto;aspect-ratio:360/440;touch-action:manipulation}
+.overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:22px;text-align:center;background:linear-gradient(180deg,#081023bb,#080b18eF);backdrop-filter:blur(7px)}
+.overlay.hidden{display:none}
+.modal{width:100%;max-width:285px}
+.emblem{font-size:49px;color:var(--cyan);text-shadow:0 0 28px #53ffe877;margin-bottom:4px}
+.modal h2{font-size:25px;line-height:1.05;margin:3px 0 10px;font-weight:1000;letter-spacing:-.7px}
+.modal p{font-size:12px;color:#bdc8e1;line-height:1.6;margin:0 0 17px}
+.primary{width:100%;border:0;border-radius:14px;background:linear-gradient(100deg,#53ffe8,#9dffef);color:#07121d;font-weight:1000;font-size:15px;padding:15px 12px;box-shadow:0 7px 25px #53ffe82b;touch-action:manipulation}
+.primary:active,.control:active{transform:scale(.98)}
+.subline{font-size:10px;color:#8291b2;margin-top:11px;letter-spacing:1px}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px 12px 8px;background:#0b1225}
+.control{border:1px solid #34496d;background:linear-gradient(180deg,#192744,#111b31);color:#e6edff;border-radius:14px;padding:13px 8px;font-size:12px;font-weight:950;touch-action:manipulation}
+.control span{color:var(--cyan);font-size:17px;vertical-align:-1px;margin:0 5px}
+.hint{text-align:center;padding:3px 10px 13px;background:#0b1225;color:#7f8ead;font-size:9px;letter-spacing:1.3px;font-weight:800}
+.below{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:11px}
+.stat{border:1px solid #253452;background:linear-gradient(145deg,#121c33,#0d1427);border-radius:15px;padding:11px 12px}
+.stat .label{font-size:9px}.stat strong{display:block;font-size:16px;margin-top:4px}.gold{color:var(--gold)}
+.footer{text-align:center;font-size:9px;color:#5e6d90;letter-spacing:1.5px;margin:15px 0 5px}
+</style>
+</head>
+<body>
+<main class="app">
+<header><div class="brand">✦ ARCADE LAB / 001</div><div class="pill">● OFFLINE READY</div></header>
+<section class="hero"><div><h1>NEON<br><span>RUSH.</span></h1><p class="tagline">Reflejos rápidos. Un récord más.</p></div><div class="mini-icon">◇</div></section>
+<section class="gamebox">
+<div class="hud">
+<div class="hudcell"><div class="label">PUNTOS</div><div class="value" id="score">000</div></div>
+<div class="hudcell" style="text-align:center"><div class="label">COMBO</div><div class="value cyan" id="combo">×1</div></div>
+<div class="hudcell"><div class="label">RÉCORD</div><div class="value pink" id="best">000</div></div>
+</div>
+<div class="stage"><canvas id="game" width="360" height="440"></canvas>
+<div class="overlay" id="overlay"><div class="modal"><div class="emblem">◈</div><h2 id="headline">¿LISTO PARA<br>EL RUSH?</h2><p id="message">Deslízate entre carriles, esquiva los bloques rojos y recoge núcleos de energía. Cuanto más aguantas, más rápido se vuelve.</p><button class="primary" id="start" type="button">INICIAR PARTIDA&nbsp; ↗</button><div class="subline">3 CARRILES · REFLEJOS · SUPERA TU RÉCORD</div></div></div>
+</div>
+<div class="controls"><button class="control" id="left" type="button"><span>←</span> IZQUIERDA</button><button class="control" id="right" type="button">DERECHA <span>→</span></button></div>
+<div class="hint" id="hint">TOCA LOS BOTONES PARA CAMBIAR DE CARRIL</div>
+</section>
+<section class="below"><div class="stat"><div class="label">NÚCLEOS</div><strong class="cyan" id="cores">0 / 8</strong></div><div class="stat"><div class="label">MEJOR COMBO</div><strong id="bestcombo">×1</strong></div><div class="stat"><div class="label">VELOCIDAD</div><strong class="gold" id="level">1.0×</strong></div></section>
+<div class="footer">MANTÉN LA CALMA · LEE EL PATRÓN · ROMPE EL RÉCORD</div>
+</main>
+<script>
+(function(){
+const c=document.getElementById('game'),ctx=c.getContext('2d'),$=id=>document.getElementById(id);
+const xs=[60,180,300],py=365;
+let active=false,lane=1,score=0,combo=1,bestCombo=1,cores=0,best=0,frame=0,speed=3,spawn=0,objects=[],particles=[],raf=0,shake=0,mission=false;
+try{best=Number(localStorage.getItem('neonRushBest')||0)}catch(e){}
+$('best').textContent=String(best).padStart(3,'0');
+function hud(){$('score').textContent=String(score).padStart(3,'0');$('combo').textContent='×'+combo;$('cores').textContent=Math.min(cores,8)+' / 8';$('bestcombo').textContent='×'+bestCombo;$('level').textContent=(speed/3).toFixed(1)+'×'}
+function particle(x,y,color,n=12){for(let i=0;i<n;i++){let a=Math.random()*Math.PI*2,v=1+Math.random()*3;particles.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:20+Math.random()*12,color,size:1+Math.random()*2})}}
+function move(d){if(!active)return;let old=lane;lane=Math.max(0,Math.min(2,lane+d));if(old!==lane)particle(xs[lane],py,'#53ffe8',4)}
+function rounded(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath()}
+function paint(){
+ctx.clearRect(0,0,360,440);
+let g=ctx.createLinearGradient(0,0,0,440);g.addColorStop(0,'#0b1730');g.addColorStop(1,'#070c1a');ctx.fillStyle=g;ctx.fillRect(0,0,360,440);
+ctx.save();ctx.globalAlpha=.2;for(let y=-20;y<460;y+=30){let yy=(y+frame*speed*.7)%460;ctx.strokeStyle='#3c5a85';ctx.beginPath();ctx.moveTo(0,yy);ctx.lineTo(360,yy);ctx.stroke()}ctx.restore();
+for(let x of [120,240]){ctx.strokeStyle='#2b4266';ctx.globalAlpha=.8;ctx.setLineDash([5,10]);ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,440);ctx.stroke()}ctx.setLineDash([]);ctx.globalAlpha=1;
+for(let i=0;i<35;i++){let y=(i*43+frame*speed*1.3)%440;ctx.fillStyle=i%3===0?'#53ffe8':'#59749c';ctx.globalAlpha=.25;ctx.fillRect((i*71)%360,y,2,2)}ctx.globalAlpha=1;
+objects.forEach(o=>{let x=xs[o.lane];if(o.type==='bad'){ctx.save();ctx.shadowBlur=17;ctx.shadowColor='#ff4f83';ctx.fillStyle='#ff416f';rounded(x-20,o.y-15,40,30,7);ctx.fill();ctx.shadowBlur=0;ctx.fillStyle='#ffb3c8';ctx.fillRect(x-10,o.y-2,20,4);ctx.restore()}else{let pulse=1+Math.sin(frame*.12+o.phase)*.1;ctx.save();ctx.translate(x,o.y);ctx.scale(pulse,pulse);ctx.shadowBlur=21;ctx.shadowColor='#53ffe8';ctx.strokeStyle='#53ffe8';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(0,-15);ctx.lineTo(13,0);ctx.lineTo(0,15);ctx.lineTo(-13,0);ctx.closePath();ctx.stroke();ctx.fillStyle='#d5fffa';ctx.beginPath();ctx.arc(0,0,3.5,0,Math.PI*2);ctx.fill();ctx.restore()}});
+let x=xs[lane];ctx.save();ctx.translate(x,py);ctx.shadowBlur=23;ctx.shadowColor='#53ffe8';ctx.fillStyle='#53ffe8';ctx.beginPath();ctx.moveTo(0,-21);ctx.lineTo(17,13);ctx.lineTo(0,7);ctx.lineTo(-17,13);ctx.closePath();ctx.fill();ctx.shadowBlur=0;ctx.fillStyle='#f4ffff';ctx.beginPath();ctx.arc(0,0,4,0,Math.PI*2);ctx.fill();ctx.restore();
+particles.forEach(p=>{ctx.globalAlpha=Math.max(0,p.life/32);ctx.fillStyle=p.color;ctx.fillRect(p.x,p.y,p.size,p.size)});ctx.globalAlpha=1;
+}
+function start(e){if(e){e.preventDefault()}if(active)return;cancelAnimationFrame(raf);active=true;lane=1;score=0;combo=1;bestCombo=1;cores=0;frame=0;speed=3;spawn=0;objects=[];particles=[];mission=false;hud();$('headline').innerHTML='¡A JUGAR!';$('overlay').classList.add('hidden');$('hint').textContent='ROJO = ESQUIVAR · TURQUESA = RECOGER';paint();raf=requestAnimationFrame(tick)}
+function end(){active=false;cancelAnimationFrame(raf);if(score>best){best=score;try{localStorage.setItem('neonRushBest',String(best))}catch(e){}$('best').textContent=String(best).padStart(3,'0')}$('headline').innerHTML='FIN DE LA RONDA';$('message').innerHTML='Puntuación: <b style="color:#53ffe8">'+score+'</b><br>Núcleos recogidos: '+cores+'. ¿Una más para superar tu récord?';$('start').textContent='VOLVER A JUGAR ↻';$('overlay').classList.remove('hidden');$('hint').textContent='PULSA VOLVER A JUGAR PARA REINTENTAR'}
+function tick(){if(!active)return;frame++;speed=3+Math.min(4,frame/450);spawn++;if(spawn>Math.max(25,53-frame/70)){spawn=0;let l=Math.floor(Math.random()*3);if(objects.some(o=>o.lane===l&&o.y<80))l=(l+1)%3;objects.push({lane:l,y:-20,type:Math.random()<.67?'bad':'good',phase:Math.random()*6})}
+for(let i=objects.length-1;i>=0;i--){let o=objects[i];o.y+=speed;if(o.lane===lane&&Math.abs(o.y-py)<22){if(o.type==='bad'){particle(xs[lane],py,'#ff4f83',25);paint();end();return}else{cores++;score+=100*combo;combo=Math.min(20,combo+1);bestCombo=Math.max(bestCombo,combo);particle(xs[lane],o.y,'#53ffe8',18);objects.splice(i,1);if(cores===8&&!mission){mission=true;score+=500;$('hint').textContent='¡MISIÓN COMPLETADA! +500 PUNTOS'}continue}}
+if(o.y>455){if(o.type==='bad'){score+=5}else combo=1;objects.splice(i,1)}}
+particles.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.035;p.life--});particles=particles.filter(p=>p.life>0);hud();paint();raf=requestAnimationFrame(tick)}
+$('start').addEventListener('click',start);
+$('left').addEventListener('click',()=>move(-1));$('right').addEventListener('click',()=>move(1));
+$('left').addEventListener('touchend',e=>{e.preventDefault();move(-1)},{passive:false});$('right').addEventListener('touchend',e=>{e.preventDefault();move(1)},{passive:false});
+c.addEventListener('pointerdown',e=>{if(!active)return;let r=c.getBoundingClientRect(),x=(e.clientX-r.left)/r.width;if(x<.33)move(-1);else move(1)});
+window.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')move(-1);if(e.key==='ArrowRight')move(1);if(e.key===' '&&!active)start(e)});
+paint();
+})();
+</script>
+</body>
+</html>
